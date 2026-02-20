@@ -6,7 +6,7 @@ import JobHistory, { type JobRecord } from "./JobHistory";
 import { useAppToast } from "../ToastContext";
 
 const CHARGES = [1, 2, 3, 4];
-const COLLISION_ENERGIES = [20, 25, 28, 30, 35];
+const COLLISION_ENERGIES = [20, 23, 25, 26, 27, 28, 29, 30, 32, 35, 40];
 const FRAGMENTATIONS = ["HCD", "CID"];
 const MISSED_CLEAVAGES = [0, 1, 2, 3];
 
@@ -126,10 +126,10 @@ export default function FastaMode() {
             }}
           >
             <Dna style={{ width: "2rem", height: "2rem", margin: "0 auto 0.75rem", color: "var(--color-muted-foreground)", display: "block" }} />
-            <p style={{ fontSize: "0.75rem", color: "var(--color-muted-foreground)" }}>
+            <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
               Drag &amp; drop or click to select a FASTA file
             </p>
-            <p style={{ fontSize: "0.6rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
+            <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
               Supports .fasta / .fa / .faa — proteins will be trypsin-digested
             </p>
             <input
@@ -146,8 +146,8 @@ export default function FastaMode() {
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", background: "var(--color-card)", border: "3px solid var(--color-border)", boxShadow: "inset 3px 3px 0 0 var(--color-border-dark), inset -3px -3px 0 0 var(--color-border-light)" }}>
               <Dna style={{ width: "1.25rem", height: "1.25rem", color: "var(--color-success)", flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: "0.75rem", fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</p>
-                <p style={{ fontSize: "0.6rem", color: "var(--color-muted-foreground)" }}>{(file.size / 1024).toFixed(1)} KB</p>
+                <p style={{ fontSize: "0.8rem", fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</p>
+                <p style={{ fontSize: "0.75rem", color: "var(--color-muted-foreground)" }}>{(file.size / 1024).toFixed(1)} KB</p>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); setFile(null); }}
@@ -193,7 +193,7 @@ export default function FastaMode() {
           </div>
 
           {/* Row 2: CE + Frag + Missed cleavages */}
-          <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "5rem", flexWrap: "wrap" }}>
             <div>
               <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.6rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>CE (eV)</label>
               <select value={ce} onChange={(e) => setCe(Number(e.target.value))} className="pixel-select" style={{ width: "6rem" }}>
@@ -222,7 +222,7 @@ export default function FastaMode() {
                   max={maxLen - 1}
                   onChange={(e) => setMinLen(Number(e.target.value))}
                   className="pixel-input"
-                  style={{ width: "3.5rem", textAlign: "center" }}
+                  style={{ width: "4.5rem", textAlign: "center" }}
                 />
                 <span style={{ fontFamily: "var(--font-pixel-body)", fontSize: "0.85rem" }}>–</span>
                 <input
@@ -232,7 +232,7 @@ export default function FastaMode() {
                   max={30}
                   onChange={(e) => setMaxLen(Number(e.target.value))}
                   className="pixel-input"
-                  style={{ width: "3.5rem", textAlign: "center" }}
+                  style={{ width: "4.5rem", textAlign: "center" }}
                 />
               </div>
             </div>

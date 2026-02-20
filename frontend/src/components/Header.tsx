@@ -28,10 +28,10 @@ export default function Header() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <img src={logo} alt="MS2Int logo" style={{ width: "1.75rem", height: "1.75rem", objectFit: "contain", imageRendering: "pixelated" }} />
-          <h1 style={{ fontFamily: "var(--font-pixel-title)", fontSize: "0.875rem", letterSpacing: "0.05em", margin: 0 }}>
+          <h1 style={{ fontFamily: "var(--font-pixel-title)", fontSize: "1.2rem", letterSpacing: "0.05em", margin: 0 }}>
             ★ MS2Int ★
           </h1>
-          <span style={{ color: "#fcfcfc", fontSize: "0.95rem", fontFamily: "var(--font-pixel-body)", marginLeft: "0.5rem" }}>
+          <span style={{ color: "#fcfcfc", fontSize: "1.2rem", fontFamily: "var(--font-pixel-body)", marginLeft: "0.5rem" }}>
             ═══ Spectrum Prediction Tool ═══
           </span>
         </div>

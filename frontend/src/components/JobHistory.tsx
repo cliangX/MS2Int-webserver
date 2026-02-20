@@ -17,7 +17,7 @@ interface Props {
 export default function JobHistory({ jobs, activeJobId, onSelect, onRemove }: Props) {
   if (jobs.length === 0) {
     return (
-      <div className="pixel-card p-4 text-center text-muted-foreground text-[0.7rem]">
+      <div className="pixel-card p-4 text-center text-muted-foreground text-[1rem]">
         No batch jobs submitted yet
       </div>
     );
@@ -33,8 +33,8 @@ export default function JobHistory({ jobs, activeJobId, onSelect, onRemove }: Pr
           <div
             key={job.job_id}
             className={`flex items-center gap-3 p-3 border-2 cursor-pointer transition-colors ${activeJobId === job.job_id
-                ? "border-primary bg-primary/10"
-                : "border-border-light bg-card hover:border-foreground"
+              ? "border-primary bg-primary/10"
+              : "border-border-light bg-card hover:border-foreground"
               }`}
             onClick={() => onSelect(job.job_id)}
           >

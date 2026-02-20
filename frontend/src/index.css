@@ -204,7 +204,7 @@ body {
 /* ── Pixel Tab ───────────────────────────────────────────────── */
 .pixel-tab {
   font-family: var(--font-pixel-title);
-  font-size: 0.6rem;
+  font-size: 0.8rem;
   padding: 0.5rem 1.2rem;
   border: 3px solid var(--color-border);
   border-bottom: none;

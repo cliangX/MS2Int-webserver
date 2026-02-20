@@ -19,15 +19,15 @@ function App() {
         <div style={{ display: "flex", gap: "0.5rem", borderBottom: "3px solid var(--color-border)", position: "relative" }}>
           <button
             onClick={() => setTab("single")}
-            className={`pixel-tab flex items-center gap-2 ${tab === "single" ? "pixel-tab-active" : ""
+            className={`pixel-tab flex items-center justify-center gap-2 ${tab === "single" ? "pixel-tab-active" : ""
               }`}
           >
-            <Zap className="w-3 h-3" />
+            <Zap className="w-3 h-3" style={{ position: "relative", top: "-1px" }} />
             SINGLE
           </button>
           <button
             onClick={() => setTab("batch")}
-            className={`pixel-tab flex items-center gap-2 ${tab === "batch" ? "pixel-tab-active" : ""
+            className={`pixel-tab flex items-center justify-center gap-2 ${tab === "batch" ? "pixel-tab-active" : ""
               }`}
           >
             <Layers className="w-3 h-3" />
@@ -35,7 +35,7 @@ function App() {
           </button>
           <button
             onClick={() => setTab("fasta")}
-            className={`pixel-tab flex items-center gap-2 ${tab === "fasta" ? "pixel-tab-active" : ""
+            className={`pixel-tab flex items-center justify-center gap-2 ${tab === "fasta" ? "pixel-tab-active" : ""
               }`}
           >
             <Dna className="w-3 h-3" />

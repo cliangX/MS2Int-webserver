@@ -105,7 +105,7 @@ export default function PeptideForm({ onSubmit, loading }: Props) {
         </div>
 
         {/* Modifications hint */}
-        <p className="text-muted-foreground text-[0.65rem]">
+        <p className="text-muted-foreground text-[1rem]">
           ★ Supports modifications: M[Oxidation], S[Phospho], C[Carbamidomethyl], [Acetyl]- ...
         </p>
 

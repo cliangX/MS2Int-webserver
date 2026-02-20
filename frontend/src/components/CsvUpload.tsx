@@ -51,10 +51,10 @@ export default function CsvUpload({ onUpload, loading }: Props) {
           }}
         >
           <Upload style={{ width: "2rem", height: "2rem", margin: "0 auto 0.75rem", color: "var(--color-muted-foreground)", display: "block" }} />
-          <p style={{ fontSize: "0.75rem", color: "var(--color-muted-foreground)" }}>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
             Drag &amp; drop or click to select
           </p>
-          <p style={{ fontSize: "0.6rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
             Required columns: <strong>Sequence, Charge, collision_energy, Fragmentation</strong>
           </p>
           <input
@@ -71,8 +71,8 @@ export default function CsvUpload({ onUpload, loading }: Props) {
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", background: "var(--color-card)", border: "3px solid var(--color-border)", boxShadow: "inset 3px 3px 0 0 var(--color-border-dark), inset -3px -3px 0 0 var(--color-border-light)" }}>
             <FileSpreadsheet style={{ width: "1.25rem", height: "1.25rem", color: "var(--color-success)", flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: "0.75rem", fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</p>
-              <p style={{ fontSize: "0.6rem", color: "var(--color-muted-foreground)" }}>
+              <p style={{ fontSize: "0.8rem", fontWeight: "bold", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.name}</p>
+              <p style={{ fontSize: "0.75rem", color: "var(--color-muted-foreground)" }}>
                 {(file.size / 1024).toFixed(1)} KB
               </p>
             </div>
