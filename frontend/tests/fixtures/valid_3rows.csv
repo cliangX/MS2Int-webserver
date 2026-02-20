@@ -1,0 +1,4 @@
+Sequence,Charge,collision_energy,Fragmentation
+PEPTIDEK,2,30,HCD
+ACDEFGHIK,3,25,HCD
+LMNPQRSTVWY,2,35,CID

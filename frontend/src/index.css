@@ -1,0 +1,299 @@
+@import "tailwindcss";
+
+/* ── Pixel Art Design Tokens (NES Palette) ───────────────────── */
+@theme {
+  /* Pixel fonts */
+  --font-pixel-title: "Press Start 2P", monospace;
+  --font-pixel-body: "VT323", monospace;
+  --font-pixel-code: "Silkscreen", monospace;
+
+  /* NES-style palette */
+  --color-primary: #3040d0;
+  --color-primary-foreground: #fcfcfc;
+  --color-primary-hover: #5060e0;
+
+  --color-background: #f0f0e8;
+  --color-foreground: #1a1a2e;
+
+  --color-card: #fcfcfc;
+  --color-card-foreground: #1a1a2e;
+
+  --color-border: #888888;
+  --color-border-light: #c0c0c0;
+  --color-border-dark: #404040;
+
+  --color-muted: #e8e8e0;
+  --color-muted-foreground: #606060;
+
+  --color-destructive: #d03030;
+  --color-success: #30a030;
+  --color-warning: #e8a020;
+
+  /* Spectrum ion colors — 8-bit style */
+  --color-ion-b: #3070f0;
+  --color-ion-y: #e03030;
+  --color-ion-internal: #909090;
+
+  /* Extra border width for pixel art */
+  --border-width-3: 3px;
+
+  /* No rounded corners — pixel art core */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+}
+
+/* ── Dark mode ───────────────────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --color-background: #0a0a1a;
+  --color-foreground: #e0e0d0;
+  --color-card: #14142a;
+  --color-card-foreground: #e0e0d0;
+  --color-border: #505070;
+  --color-border-light: #606080;
+  --color-border-dark: #303050;
+  --color-muted: #1a1a30;
+  --color-muted-foreground: #8080a0;
+}
+
+/* ── 3D Pixel Border Utilities ───────────────────────────────── */
+@utility pixel-border-raised {
+  border: 3px solid var(--color-border);
+  box-shadow:
+    inset -3px -3px 0 0 var(--color-border-dark),
+    inset 3px 3px 0 0 var(--color-border-light);
+}
+
+@utility pixel-border-inset {
+  border: 3px solid var(--color-border);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-border-dark),
+    inset -3px -3px 0 0 var(--color-border-light);
+}
+
+@utility pixel-shadow {
+  box-shadow: 4px 4px 0 0 var(--color-border-dark);
+}
+
+@utility pixel-shadow-pressed {
+  box-shadow: 2px 2px 0 0 var(--color-border-dark);
+  transform: translate(2px, 2px);
+}
+
+/* ── Base ────────────────────────────────────────────────────── */
+body {
+  margin: 0;
+  font-family: var(--font-pixel-body);
+  font-size: 16px;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* ── Pixel Button ────────────────────────────────────────────── */
+.pixel-btn {
+  font-family: var(--font-pixel-body);
+  font-size: 0.85rem;
+  padding: 0.6rem 1.2rem;
+  border: 3px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-foreground);
+  cursor: pointer;
+  transition: transform 0.05s, box-shadow 0.05s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 4px 4px 0 0 var(--color-border-dark);
+}
+
+.pixel-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.pixel-btn:active:not(:disabled) {
+  box-shadow: 2px 2px 0 0 var(--color-border-dark);
+  transform: translate(2px, 2px);
+}
+
+.pixel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pixel-btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.pixel-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.pixel-btn-danger {
+  background-color: var(--color-destructive);
+  color: white;
+}
+
+/* ── Pixel Input ─────────────────────────────────────────────── */
+.pixel-input {
+  font-family: var(--font-pixel-body);
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-card);
+  color: var(--color-foreground);
+  outline: none;
+  border: 3px solid var(--color-border);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-border-dark),
+    inset -3px -3px 0 0 var(--color-border-light);
+}
+
+.pixel-input:focus {
+  border-color: var(--color-primary);
+}
+
+.pixel-input::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+/* ── Pixel Select ────────────────────────────────────────────── */
+.pixel-select {
+  font-family: var(--font-pixel-body);
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-card);
+  color: var(--color-foreground);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0h12L6 6z' fill='%23404040'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2rem;
+  border: 3px solid var(--color-border);
+  box-shadow:
+    inset 3px 3px 0 0 var(--color-border-dark),
+    inset -3px -3px 0 0 var(--color-border-light);
+}
+
+.pixel-select:focus {
+  border-color: var(--color-primary);
+}
+
+/* ── Pixel Card ──────────────────────────────────────────────── */
+.pixel-card {
+  background: var(--color-card);
+  color: var(--color-card-foreground);
+  border: 3px solid var(--color-border);
+  box-shadow:
+    inset -3px -3px 0 0 var(--color-border-dark),
+    inset 3px 3px 0 0 var(--color-border-light);
+}
+
+.pixel-card-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 3px solid var(--color-border);
+  background: var(--color-muted);
+  font-family: var(--font-pixel-title);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── Pixel Tab ───────────────────────────────────────────────── */
+.pixel-tab {
+  font-family: var(--font-pixel-title);
+  font-size: 0.6rem;
+  padding: 0.5rem 1.2rem;
+  border: 3px solid var(--color-border);
+  border-bottom: none;
+  background: var(--color-muted);
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+  position: relative;
+  top: 3px;
+  letter-spacing: 0.05em;
+  transition: background 0.1s;
+}
+
+.pixel-tab:hover {
+  background: var(--color-card);
+}
+
+.pixel-tab-active {
+  background: var(--color-card);
+  color: var(--color-primary);
+  border-bottom: 3px solid var(--color-card);
+  z-index: 1;
+}
+
+/* ── Pixel Progress Bar ──────────────────────────────────────── */
+.pixel-progress {
+  height: 1.5rem;
+  border: 3px solid var(--color-border);
+  background: var(--color-muted);
+}
+
+.pixel-progress-bar {
+  height: 100%;
+  background: var(--color-success);
+  transition: width 0.3s ease;
+}
+
+/* ── Pixel loading animation ─────────────────────────────────── */
+@keyframes pixel-bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-8px);
+  }
+}
+
+.pixel-loading-dots span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 3px;
+  background: var(--color-primary);
+  animation: pixel-bounce 1.2s infinite ease-in-out;
+}
+
+.pixel-loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.pixel-loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.pixel-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(248, 249, 250, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+/* ── Scrollbar (pixel-ish) ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border: 2px solid var(--color-border-dark);
+}
