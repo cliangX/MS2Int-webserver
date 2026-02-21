@@ -35,3 +35,8 @@ MAX_PEPTIDE_LENGTH = 30
 VALID_CHARGES = list(range(1, 7))
 VALID_COLLISION_ENERGIES = [10, 20, 23, 25, 26, 27, 28, 29, 30, 35, 40, 42]
 VALID_FRAGMENTATIONS = ["HCD", "CID"]
+
+# ── Rescore ───────────────────────────────────────────────────────────────
+MAX_RESCORE_FILE_SIZE = int(os.environ.get("MS2INT_MAX_RESCORE_FILE", 200 * 1024 * 1024))  # 200MB per file
+MAX_RESCORE_TOTAL_SIZE = int(os.environ.get("MS2INT_MAX_RESCORE_TOTAL", 1024 * 1024 * 1024))  # 1GB total
+RESCORE_UPLOAD_EXPIRY_HOURS = 1  # cleanup orphan upload sessions after 1h

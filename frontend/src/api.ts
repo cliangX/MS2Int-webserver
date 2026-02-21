@@ -143,6 +143,119 @@ export async function submitFastaJob(file: File, params: FastaJobParams): Promis
   return res.json();
 }
 
+// ── Rescore mode ─────────────────────────────────────────────
+
+export interface UploadedFileInfo {
+  filename: string;
+  size_bytes: number;
+  type: "msms" | "mgf";
+}
+
+export interface MsmsFileInfo {
+  filename: string;
+  total_rows: number;
+  raw_files: string[];
+}
+
+export interface RawFileInfo {
+  raw_file: string;
+  mgf_file: string;
+  msms_file: string;
+  psm_count: number;
+}
+
+export interface RescoreUploadResponse {
+  session_id: string;
+  uploaded_files: UploadedFileInfo[];
+  msms_files: MsmsFileInfo[];
+  raw_files: RawFileInfo[];
+  unmatched_mgf_files: string[];
+  errors: string[];
+}
+
+export interface FileParam {
+  raw_file: string;
+  search_result: string;
+  fragmentation: string;
+  collision_energy: number;
+}
+
+export interface RescoreSubmitRequest {
+  session_id: string;
+  file_params: FileParam[];
+  rng?: number;
+  folds?: number;
+  max_workers?: number;
+  train_fdr?: number;
+  test_fdr?: number;
+  add_basic?: boolean;
+  add_maxquant?: boolean;
+}
+
+export interface RescoreSubmitResponse {
+  job_id: string;
+  status: string;
+  total_steps: number;
+  created_at: string;
+}
+
+export interface RescoreStatusResponse {
+  job_id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  current_step: number;
+  total_steps: number;
+  step_message: string;
+  msms_total: number;
+  msms_filtered: number;
+  accepted_psms: number;
+  accepted_peptides: number;
+  elapsed_seconds: number;
+  error: string | null;
+  result_files: string[];
+}
+
+export async function uploadRescoreFiles(files: File[]): Promise<RescoreUploadResponse> {
+  const form = new FormData();
+  for (const f of files) {
+    form.append("files", f);
+  }
+  const res = await fetch(`${BASE}/rescore/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function submitRescore(params: RescoreSubmitRequest): Promise<RescoreSubmitResponse> {
+  const res = await fetch(`${BASE}/rescore/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function getRescoreStatus(jobId: string): Promise<RescoreStatusResponse> {
+  const res = await fetch(`${BASE}/rescore/${jobId}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export function getRescoreDownloadUrl(jobId: string, filename: string): string {
+  return `${BASE}/rescore/${jobId}/download/${filename}`;
+}
+
 // ── Health ────────────────────────────────────────────────────
 
 export async function checkHealth(): Promise<HealthResponse> {

@@ -6,28 +6,44 @@ import asyncio
 import base64
 import io
 import re
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import AsyncGenerator, List
 
 import pandas as pd
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from starlette.responses import JSONResponse
 
-from config import DEVICE, VALID_COLLISION_ENERGIES, VALID_FRAGMENTATIONS, VALID_CHARGES
+from config import (
+    DEVICE, JOBS_DIR,
+    MAX_RESCORE_FILE_SIZE, MAX_RESCORE_TOTAL_SIZE,
+    VALID_COLLISION_ENERGIES, VALID_FRAGMENTATIONS, VALID_CHARGES,
+)
 from ion_labels import intensity_matrix_to_ion_list, tokenize_peptide, AA_MASS
 from job_manager import JobStatus, job_manager
 from predictor import load_model, predict_single, predict_batch_from_arrays
+from rescore_job_manager import rescore_job_manager
+from rescore_pipeline import run_rescore_pipeline
 from schemas import (
+    FileParam,
     HealthResponse,
     IonItem,
     JobListItem,
     JobStatusResponse,
     JobSubmitResponse,
+    MsmsFileInfo,
     PredictRequest,
     PredictResponse,
+    RawFileInfo,
+    RescoreStatusResponse,
+    RescoreSubmitRequest,
+    RescoreSubmitResponse,
+    RescoreUploadResponse,
     SupportedModificationsResponse,
+    UploadedFileInfo,
 )
 from spectrum_render import render_spectrum_png
 
@@ -72,6 +88,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
     # Cleanup old jobs on shutdown
     job_manager.cleanup_old_jobs()
+    rescore_job_manager.cleanup_old_jobs()
 
 
 app = FastAPI(
@@ -371,3 +388,195 @@ async def list_jobs():
         )
         for j in sorted(jobs, key=lambda x: x.created_at, reverse=True)
     ]
+
+
+# ── Rescore: file upload ──────────────────────────────────────────────────
+
+def _sanitize_filename(name: str) -> str:
+    """Keep only safe characters in filenames."""
+    return re.sub(r"[^a-zA-Z0-9._-]", "_", name)
+
+
+@app.post("/api/rescore/upload", response_model=RescoreUploadResponse)
+async def rescore_upload(files: List[UploadFile] = File(...)):
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided")
+
+    session_id = f"upl_{uuid.uuid4().hex[:8]}"
+    upload_dir = JOBS_DIR / session_id / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    uploaded_files: list[UploadedFileInfo] = []
+    msms_files_info: list[MsmsFileInfo] = []
+    errors: list[str] = []
+    total_size = 0
+
+    for f in files:
+        if f.filename is None:
+            continue
+        safe_name = _sanitize_filename(f.filename)
+        content = await f.read()
+        size = len(content)
+
+        if size > MAX_RESCORE_FILE_SIZE:
+            errors.append(f"{safe_name}: exceeds {MAX_RESCORE_FILE_SIZE // (1024*1024)}MB limit")
+            continue
+        total_size += size
+        if total_size > MAX_RESCORE_TOTAL_SIZE:
+            errors.append(f"Total upload size exceeds {MAX_RESCORE_TOTAL_SIZE // (1024*1024)}MB limit")
+            break
+
+        file_path = upload_dir / safe_name
+        file_path.write_bytes(content)
+
+        # Classify file type
+        lower = safe_name.lower()
+        if lower.endswith(".mgf") or lower.endswith(".mgf.gz"):
+            ftype = "mgf"
+        elif lower.endswith(".txt"):
+            ftype = "msms"
+        else:
+            ftype = "mgf" if ".mgf" in lower else "msms"
+
+        uploaded_files.append(UploadedFileInfo(
+            filename=safe_name, size_bytes=size, type=ftype
+        ))
+
+        # Parse msms files to extract Raw file info
+        if ftype == "msms":
+            try:
+                df = pd.read_csv(file_path, sep="\t", nrows=None, low_memory=False)
+                raw_files_in_msms = (
+                    df["Raw file"].dropna().unique().tolist()
+                    if "Raw file" in df.columns else []
+                )
+                msms_files_info.append(MsmsFileInfo(
+                    filename=safe_name,
+                    total_rows=len(df),
+                    raw_files=raw_files_in_msms,
+                ))
+            except Exception as e:
+                errors.append(f"{safe_name}: failed to parse — {e}")
+
+    # Auto-match Raw files to MGF files
+    mgf_names = {fi.filename for fi in uploaded_files if fi.type == "mgf"}
+    mgf_stem_map: dict[str, str] = {}
+    for name in mgf_names:
+        stem = name
+        if stem.lower().endswith(".mgf.gz"):
+            stem = stem[:-7]
+        elif stem.lower().endswith(".mgf"):
+            stem = stem[:-4]
+        mgf_stem_map[stem] = name
+
+    raw_files_out: list[RawFileInfo] = []
+    matched_mgf: set[str] = set()
+    for msms_info in msms_files_info:
+        for raw_file in msms_info.raw_files:
+            mgf_file = mgf_stem_map.get(raw_file, "")
+            psm_count = 0
+            try:
+                msms_path = upload_dir / msms_info.filename
+                df_tmp = pd.read_csv(msms_path, sep="\t", low_memory=False)
+                psm_count = int((df_tmp["Raw file"] == raw_file).sum())
+            except Exception:
+                pass
+            raw_files_out.append(RawFileInfo(
+                raw_file=raw_file,
+                mgf_file=mgf_file,
+                msms_file=msms_info.filename,
+                psm_count=psm_count,
+            ))
+            if mgf_file:
+                matched_mgf.add(mgf_file)
+
+    unmatched_mgf = sorted(mgf_names - matched_mgf)
+
+    return RescoreUploadResponse(
+        session_id=session_id,
+        uploaded_files=uploaded_files,
+        msms_files=msms_files_info,
+        raw_files=raw_files_out,
+        unmatched_mgf_files=unmatched_mgf,
+        errors=errors,
+    )
+
+
+# ── Rescore: submit job ───────────────────────────────────────────────────
+
+@app.post("/api/rescore/submit", response_model=RescoreSubmitResponse)
+async def rescore_submit(req: RescoreSubmitRequest):
+    session_dir = JOBS_DIR / req.session_id
+    if not session_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Upload session {req.session_id} not found")
+
+    if not req.file_params:
+        raise HTTPException(status_code=400, detail="file_params cannot be empty")
+
+    advanced = {
+        "rng": req.rng,
+        "folds": req.folds,
+        "max_workers": req.max_workers,
+        "train_fdr": req.train_fdr,
+        "test_fdr": req.test_fdr,
+        "add_basic": req.add_basic,
+        "add_maxquant": req.add_maxquant,
+    }
+
+    job = rescore_job_manager.submit(
+        session_id=req.session_id,
+        file_params=[fp.model_dump() for fp in req.file_params],
+        advanced_params=advanced,
+        pipeline_fn=run_rescore_pipeline,
+    )
+
+    return RescoreSubmitResponse(
+        job_id=job.job_id,
+        status=job.status.value,
+        total_steps=job.total_steps,
+        created_at=job.created_at,
+    )
+
+
+# ── Rescore: job status ───────────────────────────────────────────────────
+
+@app.get("/api/rescore/{job_id}", response_model=RescoreStatusResponse)
+async def rescore_status(job_id: str):
+    job = rescore_job_manager.get_status(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Rescore job {job_id} not found")
+
+    return RescoreStatusResponse(
+        job_id=job.job_id,
+        status=job.status.value,
+        current_step=job.current_step,
+        total_steps=job.total_steps,
+        step_message=job.step_message,
+        msms_total=job.msms_total,
+        msms_filtered=job.msms_filtered,
+        accepted_psms=job.accepted_psms,
+        accepted_peptides=job.accepted_peptides,
+        elapsed_seconds=round(job.elapsed_seconds, 2),
+        error=job.error,
+        result_files=job.result_files,
+    )
+
+
+# ── Rescore: download result ──────────────────────────────────────────────
+
+@app.get("/api/rescore/{job_id}/download/{filename}")
+async def rescore_download(job_id: str, filename: str):
+    job = rescore_job_manager.get_status(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Rescore job {job_id} not found")
+
+    safe = _sanitize_filename(filename)
+    file_path = Path(job.job_dir) / "rescore" / "mokapot" / safe
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"File {safe} not found")
+
+    return FileResponse(
+        path=str(file_path),
+        media_type="text/tab-separated-values",
+        filename=safe,
+    )

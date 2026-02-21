@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Zap, Layers, Dna } from "lucide-react";
+import { Zap, Layers, Dna, Scale } from "lucide-react";
 import Header from "./components/Header";
 import SingleMode from "./components/SingleMode";
 import BatchMode from "./components/BatchMode";
 import FastaMode from "./components/FastaMode";
+import RescoreMode from "./components/RescoreMode";
 
-type Tab = "single" | "batch" | "fasta";
+type Tab = "single" | "batch" | "fasta" | "rescore";
 
 function App() {
   const [tab, setTab] = useState<Tab>("single");
@@ -41,6 +42,14 @@ function App() {
             <Dna className="w-3 h-3" />
             FASTA
           </button>
+          <button
+            onClick={() => setTab("rescore")}
+            className={`pixel-tab flex items-center justify-center gap-2 ${tab === "rescore" ? "pixel-tab-active" : ""
+              }`}
+          >
+            <Scale className="w-3 h-3" />
+            RESCORE
+          </button>
         </div>
 
         {/* Tab content — both rendered, hidden via CSS to preserve state */}
@@ -53,6 +62,9 @@ function App() {
           </div>
           <div style={{ display: tab === "fasta" ? "block" : "none" }}>
             <FastaMode />
+          </div>
+          <div style={{ display: tab === "rescore" ? "block" : "none" }}>
+            <RescoreMode />
           </div>
         </div>
       </main>
