@@ -19,7 +19,7 @@ export function RescoreFileTable({ rawFiles, msmsFiles, fileParams, onChange }: 
 
   return (
     <div className="pixel-card">
-      <div className="pixel-card-header">FILE PARAMETERS</div>
+      <div className="pixel-card-header">═══ FILE PARAMETERS ═══</div>
       <div className="p-3">
         <table className="pixel-table">
           <thead>

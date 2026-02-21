@@ -413,43 +413,51 @@ def _step06_mokapot(
     add_maxquant: bool = True,
 ) -> dict:
     """Run mokapot rescoring by calling the reference script."""
-    mokapot_dir = rescore / "mokapot"
-    mokapot_dir.mkdir(parents=True, exist_ok=True)
+    # Script writes output to {cwd}/rescore/mokapot/ — cwd must be the job root
+    actual_out = rescore / "mokapot"
+    actual_out.mkdir(parents=True, exist_ok=True)
 
     cmd = [
         sys.executable,
         str(_RESCORE_DIR / "step04_rescore_mamba_ms2pip_m.py"),
-        "--msms", str(filtered_path),
-        "--features", str(features_path),
-        "--outdir", str(mokapot_dir),
+        "-i", str(filtered_path),
+        "-t", str(features_path),
         "--rng", str(rng),
         "--folds", str(folds),
         "--max_workers", str(max_workers),
         "--train_fdr", str(train_fdr),
         "--test_fdr", str(test_fdr),
     ]
-    if add_basic:
-        cmd.append("--add_basic")
-    if add_maxquant:
-        cmd.append("--add_maxquant")
+    if not add_basic:
+        cmd.append("--no-basic")
+    if not add_maxquant:
+        cmd.append("--no-maxquant")
 
-    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", timeout=3600)
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, encoding="utf-8",
+        timeout=3600, cwd=str(rescore.parent),
+    )
     if result.returncode != 0:
-        raise RuntimeError(
-            f"step04 mokapot failed: {result.stderr[-500:]}"
-        )
+        # to_txt() is called before the failing accepted_to_records() call,
+        # so result files may already exist. Only raise if no output produced.
+        psms_check = actual_out / "mokapot.psms.txt"
+        peps_check = actual_out / "mokapot.peptides.txt"
+        if not (psms_check.exists() or peps_check.exists()):
+            raise RuntimeError(
+                f"step04 mokapot failed: {result.stderr[-500:]}"
+            )
 
-    # Collect results
+    # Collect results — script writes to {cwd}/rescore/mokapot/
     result_files = []
     accepted_psms = 0
     accepted_peptides = 0
 
-    psms_file = mokapot_dir / "mokapot.psms.txt"
+    psms_file = actual_out / "mokapot.psms.txt"
     if psms_file.exists():
         result_files.append("mokapot.psms.txt")
         accepted_psms = sum(1 for _ in open(psms_file)) - 1  # minus header
 
-    peptides_file = mokapot_dir / "mokapot.peptides.txt"
+    peptides_file = actual_out / "mokapot.peptides.txt"
     if peptides_file.exists():
         result_files.append("mokapot.peptides.txt")
         accepted_peptides = sum(1 for _ in open(peptides_file)) - 1

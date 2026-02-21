@@ -17,7 +17,7 @@ export function RescoreFileList({ uploadedFiles, rawFiles, unmatchedMgf }: Props
 
   return (
     <div className="pixel-card">
-      <div className="pixel-card-header">UPLOADED FILES</div>
+      <div className="pixel-card-header">═══ UPLOADED FILES ═══</div>
       <div className="p-3">
         <table className="pixel-table">
           <thead>

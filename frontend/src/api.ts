@@ -230,6 +230,39 @@ export async function uploadRescoreFiles(files: File[]): Promise<RescoreUploadRe
   return res.json();
 }
 
+export function uploadRescoreFilesWithProgress(
+  files: File[],
+  onProgress: (percent: number) => void
+): Promise<RescoreUploadResponse> {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    for (const f of files) form.append("files", f);
+
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch { reject(new Error("Invalid JSON response")); }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.detail || `HTTP ${xhr.status}`));
+        } catch {
+          reject(new Error(`HTTP ${xhr.status}`));
+        }
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.open("POST", `${BASE}/rescore/upload`);
+    xhr.send(form);
+  });
+}
+
 export async function submitRescore(params: RescoreSubmitRequest): Promise<RescoreSubmitResponse> {
   const res = await fetch(`${BASE}/rescore/submit`, {
     method: "POST",

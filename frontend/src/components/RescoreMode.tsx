@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
-  uploadRescoreFiles,
+  uploadRescoreFilesWithProgress,
   submitRescore,
   getRescoreStatus,
   type RescoreUploadResponse,
@@ -18,6 +18,7 @@ type Phase = "idle" | "uploading" | "uploaded" | "running" | "completed" | "fail
 export default function RescoreMode() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadData, setUploadData] = useState<RescoreUploadResponse | null>(null);
   const [fileParams, setFileParams] = useState<FileParam[]>([]);
   const [jobId, setJobId] = useState("");
@@ -34,8 +35,9 @@ export default function RescoreMode() {
   const handleUpload = useCallback(async (files: File[]) => {
     setPhase("uploading");
     setError("");
+    setUploadProgress(0);
     try {
-      const resp = await uploadRescoreFiles(files);
+      const resp = await uploadRescoreFilesWithProgress(files, setUploadProgress);
       setUploadData(resp);
       // Initialize fileParams from raw_files
       setFileParams(
@@ -103,7 +105,7 @@ export default function RescoreMode() {
     <div className="space-y-4">
       {/* Header */}
       <div className="pixel-card">
-        <div className="pixel-card-header">★ RESCORE</div>
+        <div className="pixel-card-header">═══ RESCORE ═══</div>
         <div className="p-4">
           <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
             Percolator Rescoring Pipeline
@@ -133,13 +135,18 @@ export default function RescoreMode() {
       {/* Phase: IDLE — upload area */}
       {phase === "idle" && <RescoreUpload onUpload={handleUpload} />}
 
-      {/* Phase: UPLOADING — loading */}
+      {/* Phase: UPLOADING — progress bar */}
       {phase === "uploading" && (
-        <div className="pixel-card p-6 text-center">
-          <div className="pixel-loading-dots">
-            <span /><span /><span />
+        <div className="pixel-card p-6">
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "0.75rem", marginBottom: "1rem" }}>
+            UPLOADING ... {uploadProgress}%
+          </p>
+          <div className="pixel-progress">
+            <div
+              className="pixel-progress-bar"
+              style={{ width: `${uploadProgress}%`, transition: "width 0.2s ease" }}
+            />
           </div>
-          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>Uploading files...</p>
         </div>
       )}
 

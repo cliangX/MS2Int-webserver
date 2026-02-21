@@ -17,7 +17,7 @@ export function RescoreResult({ jobId, status }: Props) {
 
   return (
     <div className="pixel-card">
-      <div className="pixel-card-header">★ RESULTS</div>
+      <div className="pixel-card-header">═══ RESULTS ═══</div>
       <div className="p-4">
         <table className="pixel-table mb-4">
           <tbody>

@@ -22,7 +22,7 @@ export function RescoreProgress({ jobId, status }: Props) {
   return (
     <div className="pixel-card">
       <div className="pixel-card-header">
-        PIPELINE PROGRESS — {jobId}
+        ═══ PIPELINE PROGRESS — {jobId} ═══
       </div>
       <div className="p-4 space-y-1">
         {STEP_LABELS.map((label, i) => {
