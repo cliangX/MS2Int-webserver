@@ -1,0 +1,4 @@
+Raw file	Scan number	Sequence	Length	Modifications	Modified sequence	Charge	m/z	Mass	Score	Reverse
+TestRaw	2001	PEPTIDSK	8	Phospho (STY)	_PEPT(ph)IDSK_	2	493.2	984.4	120	
+TestRaw	2002	AASPLRK	7	Phospho (STY)	_AAS(ph)PLRK_	2	392.7	783.4	95	
+TestRaw	2003	LLYSGNR	7	Phospho (STY)	_LLY(ph)SGNR_	2	422.2	842.4	110	

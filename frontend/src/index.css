@@ -394,6 +394,11 @@ body {
   transition: border-color 0.15s, background 0.15s;
 }
 
+.pixel-file-tag-sty_sites {
+  background: var(--color-warning);
+  color: var(--color-foreground);
+}
+
 .pixel-dropzone:hover,
 .pixel-dropzone-active {
   border-color: var(--color-primary);

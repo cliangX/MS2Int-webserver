@@ -183,3 +183,77 @@ class RescoreStatusResponse(BaseModel):
     elapsed_seconds: float = 0.0
     error: Optional[str] = None
     result_files: list[str] = []
+
+
+# ── PTM Location mode ────────────────────────────────────────────────
+
+class PtmMsmsFileInfo(BaseModel):
+    filename: str
+    total_rows: int
+    raw_files: list[str]
+    phospho_psm_count: int
+
+
+class PtmRawFileInfo(BaseModel):
+    raw_file: str
+    mgf_file: str
+    msms_file: str
+    phospho_psm_count: int
+
+
+class PtmUploadResponse(BaseModel):
+    session_id: str
+    uploaded_files: list[UploadedFileInfo]
+    msms_files: list[PtmMsmsFileInfo]
+    raw_files: list[PtmRawFileInfo]
+    has_sty_file: bool = False
+    sty_filename: str = ""
+    unmatched_mgf_files: list[str] = []
+    errors: list[str] = []
+
+
+class PtmFileParam(BaseModel):
+    raw_file: str
+    search_result: str
+    fragmentation: str = "HCD"
+    collision_energy: int = 30
+
+    @field_validator("fragmentation")
+    @classmethod
+    def validate_frag(cls, v: str) -> str:
+        v = v.upper()
+        if v not in VALID_FRAGMENTATIONS:
+            raise ValueError(
+                f"fragmentation must be one of {VALID_FRAGMENTATIONS}, got {v}"
+            )
+        return v
+
+
+class PtmSubmitRequest(BaseModel):
+    session_id: str
+    file_params: list[PtmFileParam]
+    target_flr: float = 0.01
+
+
+class PtmSubmitResponse(BaseModel):
+    job_id: str
+    status: str
+    total_steps: int
+    created_at: datetime
+
+
+class PtmStatusResponse(BaseModel):
+    job_id: str
+    status: Literal["pending", "running", "completed", "failed"]
+    current_step: int = 0
+    total_steps: int = 8
+    step_message: str = ""
+    total_phospho_psms: int = 0
+    mono_phospho_psms: int = 0
+    td_candidates: int = 0
+    flr_1pct_psms: int = 0
+    flr_5pct_psms: int = 0
+    phosphosites_exported: int = 0
+    elapsed_seconds: float = 0.0
+    error: Optional[str] = None
+    result_files: list[str] = []

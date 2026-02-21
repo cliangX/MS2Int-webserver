@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Zap, Layers, Dna, Scale } from "lucide-react";
+import { Zap, Layers, Dna, Scale, MapPin } from "lucide-react";
 import Header from "./components/Header";
 import SingleMode from "./components/SingleMode";
 import BatchMode from "./components/BatchMode";
 import FastaMode from "./components/FastaMode";
 import RescoreMode from "./components/RescoreMode";
+import PtmMode from "./components/PtmMode";
 
-type Tab = "single" | "batch" | "fasta" | "rescore";
+type Tab = "single" | "batch" | "fasta" | "rescore" | "ptm";
 
 function App() {
   const [tab, setTab] = useState<Tab>("single");
@@ -50,6 +51,14 @@ function App() {
             <Scale className="w-3 h-3" />
             RESCORE
           </button>
+          <button
+            onClick={() => setTab("ptm")}
+            className={`pixel-tab flex items-center justify-center gap-2 ${tab === "ptm" ? "pixel-tab-active" : ""
+              }`}
+          >
+            <MapPin className="w-3 h-3" style={{ position: "relative", top: "-1px" }} />
+            PTM LOC
+          </button>
         </div>
 
         {/* Tab content — both rendered, hidden via CSS to preserve state */}
@@ -65,6 +74,9 @@ function App() {
           </div>
           <div style={{ display: tab === "rescore" ? "block" : "none" }}>
             <RescoreMode />
+          </div>
+          <div style={{ display: tab === "ptm" ? "block" : "none" }}>
+            <PtmMode />
           </div>
         </div>
       </main>

@@ -20,11 +20,14 @@ from starlette.responses import JSONResponse
 from config import (
     DEVICE, JOBS_DIR,
     MAX_RESCORE_FILE_SIZE, MAX_RESCORE_TOTAL_SIZE,
+    MAX_PTM_FILE_SIZE, MAX_PTM_TOTAL_SIZE,
     VALID_COLLISION_ENERGIES, VALID_FRAGMENTATIONS, VALID_CHARGES,
 )
 from ion_labels import intensity_matrix_to_ion_list, tokenize_peptide, AA_MASS
 from job_manager import JobStatus, job_manager
 from predictor import load_model, predict_single, predict_batch_from_arrays
+from ptm_job_manager import ptm_job_manager
+from ptm_pipeline import run_ptm_pipeline
 from rescore_job_manager import rescore_job_manager
 from rescore_pipeline import run_rescore_pipeline
 from schemas import (
@@ -44,6 +47,12 @@ from schemas import (
     RescoreUploadResponse,
     SupportedModificationsResponse,
     UploadedFileInfo,
+    PtmMsmsFileInfo,
+    PtmRawFileInfo,
+    PtmUploadResponse,
+    PtmSubmitRequest,
+    PtmSubmitResponse,
+    PtmStatusResponse,
 )
 from spectrum_render import render_spectrum_png
 
@@ -578,5 +587,209 @@ async def rescore_download(job_id: str, filename: str):
     return FileResponse(
         path=str(file_path),
         media_type="text/tab-separated-values",
+        filename=safe,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PTM Location endpoints
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@app.post("/api/ptm/upload", response_model=PtmUploadResponse)
+async def ptm_upload(files: List[UploadFile] = File(...)):
+    if not files:
+        raise HTTPException(status_code=400, detail="No files provided")
+
+    session_id = f"upl_{uuid.uuid4().hex[:8]}"
+    upload_dir = JOBS_DIR / session_id / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    uploaded_files: list[UploadedFileInfo] = []
+    msms_files_info: list[PtmMsmsFileInfo] = []
+    errors: list[str] = []
+    total_size = 0
+    has_sty_file = False
+    sty_filename = ""
+
+    for f in files:
+        if f.filename is None:
+            continue
+        safe_name = _sanitize_filename(f.filename)
+        content = await f.read()
+        size = len(content)
+
+        if size > MAX_PTM_FILE_SIZE:
+            errors.append(f"{safe_name}: exceeds {MAX_PTM_FILE_SIZE // (1024*1024)}MB limit")
+            continue
+        total_size += size
+        if total_size > MAX_PTM_TOTAL_SIZE:
+            errors.append(f"Total upload size exceeds {MAX_PTM_TOTAL_SIZE // (1024*1024)}MB limit")
+            break
+
+        file_path = upload_dir / safe_name
+        file_path.write_bytes(content)
+
+        # Classify file type
+        lower = safe_name.lower()
+        if lower.endswith(".mgf") or lower.endswith(".mgf.gz"):
+            ftype = "mgf"
+        elif lower.endswith(".txt"):
+            if "phospho" in lower and "sites" in lower:
+                ftype = "sty_sites"
+                has_sty_file = True
+                sty_filename = safe_name
+            else:
+                ftype = "msms"
+        else:
+            ftype = "mgf" if ".mgf" in lower else "msms"
+
+        uploaded_files.append(UploadedFileInfo(
+            filename=safe_name, size_bytes=size, type=ftype
+        ))
+
+        # Parse msms files to extract phospho PSM info
+        if ftype == "msms":
+            try:
+                df = pd.read_csv(file_path, sep="\t", nrows=None, low_memory=False)
+                raw_files_in_msms = (
+                    df["Raw file"].dropna().unique().tolist()
+                    if "Raw file" in df.columns else []
+                )
+                # Count phospho PSMs
+                phospho_count = 0
+                if "Modifications" in df.columns:
+                    mods = df["Modifications"].astype(str).str.lower()
+                    phospho_count = int(mods.str.contains("phospho", regex=False).sum())
+                msms_files_info.append(PtmMsmsFileInfo(
+                    filename=safe_name,
+                    total_rows=len(df),
+                    raw_files=raw_files_in_msms,
+                    phospho_psm_count=phospho_count,
+                ))
+            except Exception as e:
+                errors.append(f"{safe_name}: failed to parse — {e}")
+
+    # Auto-match Raw files to MGF files
+    mgf_names = {fi.filename for fi in uploaded_files if fi.type == "mgf"}
+    mgf_stem_map: dict[str, str] = {}
+    for name in mgf_names:
+        stem = name
+        if stem.lower().endswith(".mgf.gz"):
+            stem = stem[:-7]
+        elif stem.lower().endswith(".mgf"):
+            stem = stem[:-4]
+        mgf_stem_map[stem] = name
+
+    raw_files_out: list[PtmRawFileInfo] = []
+    matched_mgf: set[str] = set()
+    for msms_info in msms_files_info:
+        for raw_file in msms_info.raw_files:
+            mgf_file = mgf_stem_map.get(raw_file, "")
+            phospho_psm_count = 0
+            try:
+                msms_path = upload_dir / msms_info.filename
+                df_tmp = pd.read_csv(msms_path, sep="\t", low_memory=False)
+                raw_mask = df_tmp["Raw file"] == raw_file
+                if "Modifications" in df_tmp.columns:
+                    mods = df_tmp["Modifications"].astype(str).str.lower()
+                    phospho_psm_count = int((raw_mask & mods.str.contains("phospho", regex=False)).sum())
+            except Exception:
+                pass
+            raw_files_out.append(PtmRawFileInfo(
+                raw_file=raw_file,
+                mgf_file=mgf_file,
+                msms_file=msms_info.filename,
+                phospho_psm_count=phospho_psm_count,
+            ))
+            if mgf_file:
+                matched_mgf.add(mgf_file)
+
+    unmatched_mgf = sorted(mgf_names - matched_mgf)
+
+    return PtmUploadResponse(
+        session_id=session_id,
+        uploaded_files=uploaded_files,
+        msms_files=msms_files_info,
+        raw_files=raw_files_out,
+        has_sty_file=has_sty_file,
+        sty_filename=sty_filename,
+        unmatched_mgf_files=unmatched_mgf,
+        errors=errors,
+    )
+
+
+# ── PTM Location: submit job ─────────────────────────────────────────────
+
+@app.post("/api/ptm/submit", response_model=PtmSubmitResponse)
+async def ptm_submit(req: PtmSubmitRequest):
+    session_dir = JOBS_DIR / req.session_id
+    if not session_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Upload session {req.session_id} not found")
+
+    if not req.file_params:
+        raise HTTPException(status_code=400, detail="file_params cannot be empty")
+
+    advanced = {
+        "target_flr": req.target_flr,
+    }
+
+    job = ptm_job_manager.submit(
+        session_id=req.session_id,
+        file_params=[fp.model_dump() for fp in req.file_params],
+        advanced_params=advanced,
+        pipeline_fn=run_ptm_pipeline,
+    )
+
+    return PtmSubmitResponse(
+        job_id=job.job_id,
+        status=job.status.value,
+        total_steps=job.total_steps,
+        created_at=job.created_at,
+    )
+
+
+# ── PTM Location: job status ─────────────────────────────────────────────
+
+@app.get("/api/ptm/{job_id}", response_model=PtmStatusResponse)
+async def ptm_status(job_id: str):
+    job = ptm_job_manager.get_status(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"PTM job {job_id} not found")
+
+    return PtmStatusResponse(
+        job_id=job.job_id,
+        status=job.status.value,
+        current_step=job.current_step,
+        total_steps=job.total_steps,
+        step_message=job.step_message,
+        total_phospho_psms=job.total_phospho_psms,
+        mono_phospho_psms=job.mono_phospho_psms,
+        td_candidates=job.td_candidates,
+        flr_1pct_psms=job.flr_1pct_psms,
+        flr_5pct_psms=job.flr_5pct_psms,
+        phosphosites_exported=job.phosphosites_exported,
+        elapsed_seconds=round(job.elapsed_seconds, 2),
+        error=job.error,
+        result_files=job.result_files,
+    )
+
+
+# ── PTM Location: download result ────────────────────────────────────────
+
+@app.get("/api/ptm/{job_id}/download/{filename}")
+async def ptm_download(job_id: str, filename: str):
+    job = ptm_job_manager.get_status(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"PTM job {job_id} not found")
+
+    safe = _sanitize_filename(filename)
+    file_path = Path(job.job_dir) / "ptm_work" / safe
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"File {safe} not found")
+
+    return FileResponse(
+        path=str(file_path),
+        media_type="text/csv",
         filename=safe,
     )

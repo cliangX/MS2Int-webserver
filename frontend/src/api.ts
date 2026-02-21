@@ -148,7 +148,7 @@ export async function submitFastaJob(file: File, params: FastaJobParams): Promis
 export interface UploadedFileInfo {
   filename: string;
   size_bytes: number;
-  type: "msms" | "mgf";
+  type: "msms" | "mgf" | "sty_sites";
 }
 
 export interface MsmsFileInfo {
@@ -287,6 +287,129 @@ export async function getRescoreStatus(jobId: string): Promise<RescoreStatusResp
 
 export function getRescoreDownloadUrl(jobId: string, filename: string): string {
   return `${BASE}/rescore/${jobId}/download/${filename}`;
+}
+
+// ── PTM Location mode ─────────────────────────────────────────
+
+export interface PtmMsmsFileInfo {
+  filename: string;
+  total_rows: number;
+  raw_files: string[];
+  phospho_psm_count: number;
+}
+
+export interface PtmRawFileInfo {
+  raw_file: string;
+  mgf_file: string;
+  msms_file: string;
+  phospho_psm_count: number;
+}
+
+export interface PtmUploadResponse {
+  session_id: string;
+  uploaded_files: UploadedFileInfo[];
+  msms_files: PtmMsmsFileInfo[];
+  raw_files: PtmRawFileInfo[];
+  has_sty_file: boolean;
+  sty_filename: string;
+  unmatched_mgf_files: string[];
+  errors: string[];
+}
+
+export interface PtmFileParam {
+  raw_file: string;
+  search_result: string;
+  fragmentation: string;
+  collision_energy: number;
+}
+
+export interface PtmSubmitRequest {
+  session_id: string;
+  file_params: PtmFileParam[];
+  target_flr: number;
+}
+
+export interface PtmSubmitResponse {
+  job_id: string;
+  status: string;
+  total_steps: number;
+  created_at: string;
+}
+
+export interface PtmStatusResponse {
+  job_id: string;
+  status: "pending" | "running" | "completed" | "failed";
+  current_step: number;
+  total_steps: number;
+  step_message: string;
+  total_phospho_psms: number;
+  mono_phospho_psms: number;
+  td_candidates: number;
+  flr_1pct_psms: number;
+  flr_5pct_psms: number;
+  phosphosites_exported: number;
+  elapsed_seconds: number;
+  error: string | null;
+  result_files: string[];
+}
+
+export function uploadPtmFilesWithProgress(
+  files: File[],
+  onProgress: (percent: number) => void
+): Promise<PtmUploadResponse> {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    for (const f of files) form.append("files", f);
+
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch { reject(new Error("Invalid JSON response")); }
+      } else {
+        try {
+          const err = JSON.parse(xhr.responseText);
+          reject(new Error(err.detail || `HTTP ${xhr.status}`));
+        } catch {
+          reject(new Error(`HTTP ${xhr.status}`));
+        }
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.open("POST", `${BASE}/ptm/upload`);
+    xhr.send(form);
+  });
+}
+
+export async function submitPtm(params: PtmSubmitRequest): Promise<PtmSubmitResponse> {
+  const res = await fetch(`${BASE}/ptm/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function getPtmStatus(jobId: string): Promise<PtmStatusResponse> {
+  const res = await fetch(`${BASE}/ptm/${jobId}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export function getPtmDownloadUrl(jobId: string, filename: string): string {
+  return `${BASE}/ptm/${jobId}/download/${filename}`;
 }
 
 // ── Health ────────────────────────────────────────────────────
