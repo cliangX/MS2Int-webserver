@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sun, Moon, Github } from "lucide-react";
+import { Sun, Moon, Github, Plug } from "lucide-react";
 import logo from "../assets/ms2int-logo.png";
 
 export default function Header() {
@@ -43,6 +43,15 @@ export default function Header() {
           >
             {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+          <a
+            href="/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ padding: "0.5rem", color: "inherit", display: "flex" }}
+            title="API Docs"
+          >
+            <Plug className="w-4 h-4" />
+          </a>
           <a
             href="https://github.com/cliangX/MS2Int"
             target="_blank"
