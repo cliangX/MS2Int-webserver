@@ -47,15 +47,42 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --color-background: #0a0a1a;
-  --color-foreground: #e0e0d0;
-  --color-card: #14142a;
-  --color-card-foreground: #e0e0d0;
-  --color-border: #505070;
-  --color-border-light: #606080;
-  --color-border-dark: #303050;
-  --color-muted: #1a1a30;
-  --color-muted-foreground: #8080a0;
+  /* 背景层 */
+  --color-background: #0c0e1a;
+  --color-foreground: #d8dce8;
+  --color-card: #181c2e;
+  --color-card-foreground: #d8dce8;
+  --color-muted: #1e2338;
+  --color-muted-foreground: #7882a4;
+
+  /* 边框层 */
+  --color-border: #3e4460;
+  --color-border-light: #5a6080;
+  --color-border-dark: #282c44;
+
+  /* 强调色 */
+  --color-primary: #4c60e8;
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: #6478f0;
+
+  /* 语义色 */
+  --color-destructive: #e84040;
+  --color-success: #40b840;
+  --color-warning: #f0b030;
+
+  /* 离子色 */
+  --color-ion-b: #4888ff;
+  --color-ion-y: #ff4848;
+  --color-ion-internal: #a0a0b0;
+}
+
+/* ── Dark mode overrides for hardcoded elements ──────────────── */
+.dark .pixel-overlay {
+  background: rgba(12, 14, 26, 0.88);
+}
+
+.dark .pixel-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0h12L6 6z' fill='%237882a4'/%3E%3C/svg%3E");
 }
 
 /* ── 3D Pixel Border Utilities ───────────────────────────────── */
@@ -403,4 +430,160 @@ body {
 .pixel-dropzone-active {
   border-color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+}
+
+/* ── Header Navigation Links ───────────────────────────────── */
+.header-nav-link {
+  font-family: var(--font-pixel-title);
+  font-size: 0.55rem;
+  color: inherit;
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+
+.header-nav-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── About Section ─────────────────────────────────────────── */
+.about-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.about-toggle-btn {
+  font-family: var(--font-pixel-title);
+  font-size: 0.5rem;
+  background: none;
+  border: 2px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+.about-toggle-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.about-body {
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+.about-body-expanded {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.about-body-collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.about-intro {
+  font-family: var(--font-pixel-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-foreground);
+  text-align: center;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.about-feature-card {
+  border: 3px solid var(--color-border);
+  padding: 1rem;
+  text-align: center;
+  background: var(--color-muted);
+  box-shadow:
+    inset -2px -2px 0 0 var(--color-border-dark),
+    inset 2px 2px 0 0 var(--color-border-light);
+}
+
+.about-feature-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.about-feature-title {
+  font-family: var(--font-pixel-title);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.about-feature-stat {
+  font-family: var(--font-pixel-body);
+  font-size: 1rem;
+  color: var(--color-success);
+  margin-bottom: 0.5rem;
+}
+
+.about-feature-desc {
+  font-family: var(--font-pixel-body);
+  font-size: 0.85rem;
+  color: var(--color-muted-foreground);
+  line-height: 1.3;
+}
+
+.about-tech {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.about-tech-title {
+  font-family: var(--font-pixel-title);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--color-muted-foreground);
+  margin-bottom: 0.75rem;
+}
+
+.about-tech-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.about-tech-badge {
+  font-family: var(--font-pixel-body);
+  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem;
+  border: 2px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-foreground);
+}
+
+.about-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px dashed var(--color-border-light);
 }

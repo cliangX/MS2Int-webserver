@@ -31,11 +31,22 @@ export default function Header() {
           <h1 style={{ fontFamily: "var(--font-pixel-title)", fontSize: "1.2rem", letterSpacing: "0.05em", margin: 0 }}>
             ★ MS2Int ★
           </h1>
-          <span style={{ color: "#fcfcfc", fontSize: "1.2rem", fontFamily: "var(--font-pixel-body)", marginLeft: "0.5rem" }}>
+          <span style={{ color: "var(--color-background)", fontSize: "1.2rem", fontFamily: "var(--font-pixel-body)", marginLeft: "0.5rem" }}>
             ═══ Spectrum Prediction Tool ═══
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <a href="#about" className="header-nav-link" onClick={(e) => {
+            e.preventDefault();
+            const el = document.getElementById("about");
+            if (el) { el.scrollIntoView({ behavior: "smooth" }); }
+          }}>ABOUT</a>
+          <a href="#start" className="header-nav-link" onClick={(e) => {
+            e.preventDefault();
+            const el = document.getElementById("start");
+            if (el) { el.scrollIntoView({ behavior: "smooth" }); }
+          }}>START</a>
+          <span style={{ color: "inherit", opacity: 0.4, fontSize: "0.85rem" }}>│</span>
           <button
             onClick={() => setDark(!dark)}
             style={{ padding: "0.5rem", background: "none", border: "none", color: "inherit", cursor: "pointer" }}

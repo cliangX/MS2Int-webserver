@@ -26,6 +26,21 @@ export default function SingleMode() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+      <div className="pixel-card">
+        <div className="pixel-card-header">═══ SINGLE PREDICTION ═══</div>
+        <div className="p-4">
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+            Interactive Spectrum Prediction
+          </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            Enter a peptide sequence with charge, collision energy, and fragmentation type → MS2Int instantly predicts its MS/MS spectrum with both terminal (b/y) and internal fragment ions
+          </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            Supports modifications: M[Oxidation], S[Phospho], C[Carbamidomethyl], [Acetyl]- ...
+          </p>
+        </div>
+      </div>
+
       <PeptideForm onSubmit={handlePredict} loading={loading} />
 
       {result ? (

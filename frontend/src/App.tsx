@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Zap, Layers, Dna, Scale, MapPin } from "lucide-react";
 import Header from "./components/Header";
+import AboutSection from "./components/AboutSection";
 import SingleMode from "./components/SingleMode";
 import BatchMode from "./components/BatchMode";
 import FastaMode from "./components/FastaMode";
@@ -17,8 +18,10 @@ function App() {
       <Header />
 
       <main style={{ maxWidth: "64rem", margin: "0 auto", padding: "0 1.5rem 3rem" }}>
+        <AboutSection />
+
         {/* Tab bar */}
-        <div style={{ display: "flex", gap: "0.5rem", borderBottom: "3px solid var(--color-border)", position: "relative" }}>
+        <div id="start" style={{ display: "flex", gap: "0.5rem", borderBottom: "3px solid var(--color-border)", position: "relative" }}>
           <button
             onClick={() => setTab("single")}
             className={`pixel-tab flex items-center justify-center gap-2 ${tab === "single" ? "pixel-tab-active" : ""

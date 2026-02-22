@@ -61,6 +61,21 @@ export default function BatchMode() {
 
   return (
     <div className="space-y-5">
+      <div className="pixel-card">
+        <div className="pixel-card-header">═══ BATCH PREDICTION ═══</div>
+        <div className="p-4">
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+            Bulk Spectrum Prediction
+          </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            Upload a CSV file containing peptide sequences → MS2Int batch predict → Download predicted spectra
+          </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            Accepts: .csv with columns (sequence, charge, collision_energy, fragmentation)
+          </p>
+        </div>
+      </div>
+
       <CsvUpload onUpload={handleUpload} loading={loading} />
 
       {activeJobId && (

@@ -105,6 +105,22 @@ export default function FastaMode() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
 
+      {/* Description card */}
+      <div className="pixel-card">
+        <div className="pixel-card-header">═══ FASTA PREDICTION ═══</div>
+        <div className="p-4">
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+            Spectrum Library Generation
+          </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            Upload a FASTA protein file → trypsin in-silico digestion → batch spectrum prediction with configurable charge states, collision energy, and peptide length filters → Download spectral library
+          </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            Accepts: .fasta / .fa / .faa files — proteins will be trypsin-digested
+          </p>
+        </div>
+      </div>
+
       {/* Upload card */}
       <div className="pixel-card">
         <div className="pixel-card-header">═══ UPLOAD FASTA ═══</div>
@@ -118,7 +134,7 @@ export default function FastaMode() {
             onClick={() => inputRef.current?.click()}
             style={{
               border: `3px dashed ${dragOver ? "var(--color-primary)" : "var(--color-muted-foreground)"}`,
-              background: dragOver ? "rgba(48,64,208,0.07)" : "var(--color-card)",
+              background: dragOver ? "color-mix(in srgb, var(--color-primary) 7%, var(--color-card))" : "var(--color-card)",
               padding: "2rem",
               textAlign: "center",
               cursor: "pointer",

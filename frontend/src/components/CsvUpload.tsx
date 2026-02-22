@@ -43,7 +43,7 @@ export default function CsvUpload({ onUpload, loading }: Props) {
           onClick={() => inputRef.current?.click()}
           style={{
             border: `3px dashed ${dragOver ? "var(--color-primary)" : "var(--color-muted-foreground)"}`,
-            background: dragOver ? "rgba(48,64,208,0.07)" : "var(--color-card)",
+            background: dragOver ? "color-mix(in srgb, var(--color-primary) 7%, var(--color-card))" : "var(--color-card)",
             padding: "2rem",
             textAlign: "center",
             cursor: "pointer",
