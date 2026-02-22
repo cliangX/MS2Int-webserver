@@ -587,3 +587,69 @@ body {
   padding-top: 1rem;
   border-top: 2px dashed var(--color-border-light);
 }
+
+/* ── External Resources ────────────────────────────────────── */
+.resources-section {
+  max-width: 64rem;
+  margin: 2rem auto 0;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .resources-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.resource-card {
+  border: 3px solid var(--color-border);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  background: var(--color-card);
+  transition: border-color 0.15s;
+  box-shadow:
+    inset -2px -2px 0 0 var(--color-border-dark),
+    inset 2px 2px 0 0 var(--color-border-light);
+}
+
+.resource-card:hover {
+  border-color: var(--color-primary);
+}
+
+.resource-icon {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.resource-name {
+  font-family: var(--font-pixel-title);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.resource-desc {
+  font-family: var(--font-pixel-body);
+  font-size: 0.8rem;
+  color: var(--color-muted-foreground);
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+}
+
+.resource-link {
+  font-family: var(--font-pixel-body);
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.resource-link:hover {
+  text-decoration: underline;
+}

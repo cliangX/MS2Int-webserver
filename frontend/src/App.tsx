@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Zap, Layers, Dna, Scale, MapPin } from "lucide-react";
+import { Zap, Layers, Dna, Scale, MapPin, Database, Search, Filter } from "lucide-react";
 import Header from "./components/Header";
 import AboutSection from "./components/AboutSection";
 import SingleMode from "./components/SingleMode";
@@ -83,6 +83,34 @@ function App() {
           </div>
         </div>
       </main>
+
+      <section className="resources-section">
+        <div className="pixel-card">
+          <div className="pixel-card-header">═══ EXTERNAL RESOURCES ═══</div>
+          <div style={{ padding: "1.5rem" }}>
+            <div className="resources-grid">
+              <a href="https://www.uniprot.org" target="_blank" rel="noopener noreferrer" className="resource-card" style={{ textDecoration: "none", color: "inherit" }}>
+                <div className="resource-icon"><Database className="w-6 h-6" style={{ margin: "0 auto" }} /></div>
+                <div className="resource-name">UNIPROT</div>
+                <div className="resource-desc">Universal Protein Resource — comprehensive protein sequence &amp; annotation database</div>
+                <span className="resource-link">uniprot.org →</span>
+              </a>
+              <a href="https://www.maxquant.org" target="_blank" rel="noopener noreferrer" className="resource-card" style={{ textDecoration: "none", color: "inherit" }}>
+                <div className="resource-icon"><Search className="w-6 h-6" style={{ margin: "0 auto" }} /></div>
+                <div className="resource-name">MAXQUANT</div>
+                <div className="resource-desc">Quantitative proteomics software for analyzing large mass-spectrometric datasets</div>
+                <span className="resource-link">maxquant.org →</span>
+              </a>
+              <a href="http://percolator.ms" target="_blank" rel="noopener noreferrer" className="resource-card" style={{ textDecoration: "none", color: "inherit" }}>
+                <div className="resource-icon"><Filter className="w-6 h-6" style={{ margin: "0 auto" }} /></div>
+                <div className="resource-name">PERCOLATOR</div>
+                <div className="resource-desc">Semi-supervised learning for peptide identification in shotgun proteomics</div>
+                <span className="resource-link">percolator.ms →</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <footer style={{
         textAlign: "center",
