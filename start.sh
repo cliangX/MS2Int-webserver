@@ -79,7 +79,8 @@ FRONTEND_PID=$!
 TUNNEL_PID=""
 if [ -n "$TUNNEL_TOKEN" ]; then
   echo "[3/$TOTAL_STEPS] Starting Cloudflare Tunnel (http2)..."
-  cloudflared tunnel run --protocol http2 --token "$TUNNEL_TOKEN" &
+  # Disable cloudflared self-updates to avoid unexpected tunnel shutdowns.
+  cloudflared tunnel run --protocol http2 --no-autoupdate --token "$TUNNEL_TOKEN" &
   TUNNEL_PID=$!
   sleep 3
   if kill -0 $TUNNEL_PID 2>/dev/null; then
