@@ -127,7 +127,7 @@ export default function PtmMode() {
       <div className="pixel-card">
         <div className="pixel-card-header">═══ PTM LOCATION ═══</div>
         <div className="p-4">
-          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem" }}>
             Phosphorylation Site Localization (FLR)
           </p>
           <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>

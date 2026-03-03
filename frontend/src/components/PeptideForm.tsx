@@ -110,7 +110,7 @@ export default function PeptideForm({ onSubmit, loading }: Props) {
         </p>
 
         {/* Row 3: Submit button */}
-        <div>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <button
             type="submit"
             disabled={loading || !sequence.trim()}

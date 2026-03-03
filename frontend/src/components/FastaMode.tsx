@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Upload, Dna, X } from "lucide-react";
+import { Upload, Dna, X, Download } from "lucide-react";
 import { submitFastaJob } from "../api";
 import JobStatus from "./JobStatus";
 import JobHistory, { type JobRecord } from "./JobHistory";
@@ -123,7 +123,12 @@ export default function FastaMode() {
 
       {/* Upload card */}
       <div className="pixel-card">
-        <div className="pixel-card-header">═══ UPLOAD FASTA ═══</div>
+        <div className="pixel-card-header">
+          <span>═══ UPLOAD FASTA ═══</span>
+          <a href="/api/demo/fasta" download className="demo-download-btn">
+            <Download size={14} /> DEMO
+          </a>
+        </div>
         <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
 
           {/* Drop zone */}

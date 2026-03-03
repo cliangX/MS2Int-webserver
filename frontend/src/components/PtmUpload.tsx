@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, Download } from "lucide-react";
 
 interface Props {
   onUpload: (files: File[]) => void;
@@ -27,28 +27,38 @@ export default function PtmUpload({ onUpload }: Props) {
   );
 
   return (
-    <div
-      className={`pixel-dropzone${dragActive ? " pixel-dropzone-active" : ""}`}
-      onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-      onDragLeave={() => setDragActive(false)}
-      onDrop={handleDrop}
-    >
-      <Upload className="mx-auto mb-2"
-        style={{ width: 24, height: 24, color: "var(--color-muted-foreground)" }} />
+    <div className="pixel-card">
+      <div className="pixel-card-header">
+        <span>═══ UPLOAD DATA ═══</span>
+        <a href="/api/demo/ptm" download className="demo-download-btn">
+          <Download size={14} /> DEMO
+        </a>
+      </div>
+      <div className="p-4">
+        <div
+          className={`pixel-dropzone${dragActive ? " pixel-dropzone-active" : ""}`}
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={handleDrop}
+        >
+          <Upload className="mx-auto mb-2"
+            style={{ width: 24, height: 24, color: "var(--color-muted-foreground)" }} />
 
-      <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
-        Drop msms.txt + *.mgf files here
-      </p>
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem" }}>
+            Drop msms.txt + *.mgf files here
+          </p>
 
-      <p style={{ fontSize: "0.85rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
-        Required: msms.txt (with PTM) + .mgf &nbsp;|&nbsp; Optional: Phospho(STY)Sites.txt
-      </p>
+          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
+            Required: msms.txt (with PTM) + .mgf &nbsp;|&nbsp; Optional: Phospho(STY)Sites.txt
+          </p>
 
-      <input ref={inputRef} type="file" multiple
-        accept=".txt,.mgf,.gz"
-        style={{ display: "none" }}
-        onChange={(e) => handleFiles(e.target.files)} />
+          <input ref={inputRef} type="file" multiple
+            accept=".txt,.mgf,.gz"
+            style={{ display: "none" }}
+            onChange={(e) => handleFiles(e.target.files)} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -29,7 +29,7 @@ export default function SingleMode() {
       <div className="pixel-card">
         <div className="pixel-card-header">═══ SINGLE PREDICTION ═══</div>
         <div className="p-4">
-          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem" }}>
             Interactive Spectrum Prediction
           </p>
           <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>

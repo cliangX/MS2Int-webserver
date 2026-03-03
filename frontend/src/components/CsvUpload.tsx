@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, FileSpreadsheet, X } from "lucide-react";
+import { Upload, FileSpreadsheet, X, Download } from "lucide-react";
 
 interface Props {
   onUpload: (file: File) => void;
@@ -32,7 +32,12 @@ export default function CsvUpload({ onUpload, loading }: Props) {
 
   return (
     <div className="pixel-card">
-      <div className="pixel-card-header">═══ UPLOAD CSV / TSV ═══</div>
+      <div className="pixel-card-header">
+        <span>═══ UPLOAD CSV / TSV ═══</span>
+        <a href="/api/demo/batch" download className="demo-download-btn">
+          <Download size={14} /> DEMO
+        </a>
+      </div>
       <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
 
         {/* Drop zone */}

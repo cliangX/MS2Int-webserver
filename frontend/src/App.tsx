@@ -117,7 +117,7 @@ function App() {
         padding: "1.25rem",
         color: "var(--color-muted-foreground)",
         fontFamily: "var(--font-pixel-body)",
-        fontSize: "0.85rem",
+        fontSize: "1rem",
         borderTop: "3px solid var(--color-border)",
         background: "var(--color-muted)",
         letterSpacing: "0.05em",

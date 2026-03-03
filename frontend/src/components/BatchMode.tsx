@@ -64,7 +64,7 @@ export default function BatchMode() {
       <div className="pixel-card">
         <div className="pixel-card-header">═══ BATCH PREDICTION ═══</div>
         <div className="p-4">
-          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem" }}>
             Bulk Spectrum Prediction
           </p>
           <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>

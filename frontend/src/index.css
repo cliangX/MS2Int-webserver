@@ -219,6 +219,9 @@ body {
 }
 
 .pixel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 0.75rem 1rem;
   border-bottom: 3px solid var(--color-border);
   background: var(--color-muted);
@@ -226,6 +229,29 @@ body {
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+/* ── Demo 下载按钮 ──────────────────────────────────────────── */
+.demo-download-btn {
+  font-family: var(--font-pixel-title);
+  font-size: 0.8rem;
+  background: none;
+  border: 2px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.demo-download-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 /* ── Pixel Tab ───────────────────────────────────────────────── */
@@ -461,7 +487,7 @@ body {
 
 .about-toggle-btn {
   font-family: var(--font-pixel-title);
-  font-size: 0.5rem;
+  font-size: 0.8rem;
   background: none;
   border: 2px solid var(--color-border);
   color: var(--color-muted-foreground);
@@ -496,7 +522,7 @@ body {
   line-height: 1.6;
   color: var(--color-foreground);
   text-align: center;
-  max-width: 48rem;
+  max-width: 64rem;
   margin: 0 auto;
 }
 
@@ -513,11 +539,9 @@ body {
   right: 0;
   bottom: 0;
   height: 2px;
-  background: repeating-linear-gradient(
-    to right,
-    var(--color-primary) 0 4px,
-    transparent 4px 6px
-  );
+  background: repeating-linear-gradient(to right,
+      var(--color-primary) 0 4px,
+      transparent 4px 6px);
 }
 
 .about-features-grid {
@@ -649,7 +673,7 @@ body {
 
 .resource-name {
   font-family: var(--font-pixel-title);
-  font-size: 0.5rem;
+  font-size: 1rem;
   letter-spacing: 0.08em;
   color: var(--color-primary);
   margin-bottom: 0.5rem;

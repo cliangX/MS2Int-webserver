@@ -18,10 +18,15 @@ from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse
 
 from config import (
-    DEVICE, JOBS_DIR,
-    MAX_RESCORE_FILE_SIZE, MAX_RESCORE_TOTAL_SIZE,
-    MAX_PTM_FILE_SIZE, MAX_PTM_TOTAL_SIZE,
-    VALID_COLLISION_ENERGIES, VALID_FRAGMENTATIONS, VALID_CHARGES,
+    DEVICE,
+    JOBS_DIR,
+    MAX_RESCORE_FILE_SIZE,
+    MAX_RESCORE_TOTAL_SIZE,
+    MAX_PTM_FILE_SIZE,
+    MAX_PTM_TOTAL_SIZE,
+    VALID_COLLISION_ENERGIES,
+    VALID_FRAGMENTATIONS,
+    VALID_CHARGES,
 )
 from ion_labels import intensity_matrix_to_ion_list, tokenize_peptide, AA_MASS
 from job_manager import JobStatus, job_manager
@@ -59,6 +64,7 @@ from spectrum_render import render_spectrum_png
 
 # ── FASTA utilities ───────────────────────────────────────────────────────
 
+
 def _parse_fasta(content: str) -> list[str]:
     """Return flat list of protein sequences from FASTA text."""
     sequences: list[str] = []
@@ -90,6 +96,7 @@ def _digest_trypsin(sequence: str, missed_cleavages: int) -> list[str]:
 
 # ── Lifespan ───────────────────────────────────────────────────────────────
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Load model on startup, cleanup on shutdown."""
@@ -117,9 +124,11 @@ app.add_middleware(
 
 # ── Health ─────────────────────────────────────────────────────────────────
 
+
 @app.get("/api/health", response_model=HealthResponse)
 async def health():
     from predictor import _model
+
     return HealthResponse(
         status="ok" if _model is not None else "model_not_loaded",
         model_loaded=_model is not None,
@@ -129,17 +138,23 @@ async def health():
 
 # ── Supported modifications ───────────────────────────────────────────────
 
+
 @app.get("/api/supported-modifications", response_model=SupportedModificationsResponse)
 async def supported_modifications():
     from predictor import AA_VOCAB
-    mods = sorted(set(
-        k for k in AA_VOCAB
-        if "[" in k and not k.startswith("[") and not k.startswith("-")
-    ))
+
+    mods = sorted(
+        set(
+            k
+            for k in AA_VOCAB
+            if "[" in k and not k.startswith("[") and not k.startswith("-")
+        )
+    )
     return SupportedModificationsResponse(modifications=mods)
 
 
 # ── Single prediction (sync) ──────────────────────────────────────────────
+
 
 @app.post("/api/predict", response_model=PredictResponse)
 async def predict(req: PredictRequest):
@@ -149,10 +164,13 @@ async def predict(req: PredictRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid sequence: {e}")
 
-    aa_count = len([
-        t for t in tokens
-        if not (t.startswith("[") and t.endswith("]-")) and t != "-[]"
-    ])
+    aa_count = len(
+        [
+            t
+            for t in tokens
+            if not (t.startswith("[") and t.endswith("]-")) and t != "-[]"
+        ]
+    )
     if aa_count > 30:
         raise HTTPException(
             status_code=400,
@@ -163,7 +181,9 @@ async def predict(req: PredictRequest):
 
     # Check for unsupported residues
     if "U" in req.sequence:
-        raise HTTPException(status_code=400, detail="Selenocysteine (U) is not supported")
+        raise HTTPException(
+            status_code=400, detail="Selenocysteine (U) is not supported"
+        )
 
     # Run prediction in thread pool to avoid blocking
     loop = asyncio.get_event_loop()
@@ -205,6 +225,7 @@ async def predict(req: PredictRequest):
 
 # ── Batch job submission (async) ──────────────────────────────────────────
 
+
 @app.post("/api/jobs/submit", response_model=JobSubmitResponse)
 async def submit_job(file: UploadFile = File(...)):
     if file.filename is None:
@@ -239,6 +260,7 @@ async def submit_job(file: UploadFile = File(...)):
 
 # ── FASTA job submission ─────────────────────────────────────────────────
 
+
 @app.post("/api/jobs/submit-fasta", response_model=JobSubmitResponse)
 async def submit_fasta_job(
     file: UploadFile = File(...),
@@ -254,7 +276,10 @@ async def submit_fasta_job(
 
     ext = Path(file.filename).suffix.lower()
     if ext not in (".fasta", ".fa", ".faa", ".txt"):
-        raise HTTPException(status_code=400, detail="Only FASTA files (.fasta/.fa/.faa/.txt) are supported")
+        raise HTTPException(
+            status_code=400,
+            detail="Only FASTA files (.fasta/.fa/.faa/.txt) are supported",
+        )
 
     content_bytes = await file.read()
     if len(content_bytes) == 0:
@@ -271,20 +296,31 @@ async def submit_fasta_job(
         if not charge_list:
             raise ValueError
     except ValueError:
-        raise HTTPException(status_code=400, detail="charges must be comma-separated integers e.g. '1,2,3'")
+        raise HTTPException(
+            status_code=400,
+            detail="charges must be comma-separated integers e.g. '1,2,3'",
+        )
 
     if missed_cleavages < 0 or missed_cleavages > 3:
         raise HTTPException(status_code=400, detail="missed_cleavages must be 0-3")
     if collision_energy not in VALID_COLLISION_ENERGIES:
-        raise HTTPException(status_code=400, detail=f"collision_energy must be one of {VALID_COLLISION_ENERGIES}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"collision_energy must be one of {VALID_COLLISION_ENERGIES}",
+        )
     fragmentation = fragmentation.upper()
     if fragmentation not in VALID_FRAGMENTATIONS:
-        raise HTTPException(status_code=400, detail=f"fragmentation must be one of {VALID_FRAGMENTATIONS}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"fragmentation must be one of {VALID_FRAGMENTATIONS}",
+        )
 
     # Digest all proteins
     proteins = _parse_fasta(content_str)
     if not proteins:
-        raise HTTPException(status_code=400, detail="No protein sequences found in FASTA file")
+        raise HTTPException(
+            status_code=400, detail="No protein sequences found in FASTA file"
+        )
 
     seen: set[str] = set()
     rows: list[dict] = []
@@ -301,17 +337,19 @@ async def submit_fasta_job(
                 continue
             seen.add(pep)
             for chg in charge_list:
-                rows.append({
-                    "Sequence": pep,
-                    "Charge": chg,
-                    "collision_energy": collision_energy,
-                    "Fragmentation": fragmentation,
-                })
+                rows.append(
+                    {
+                        "Sequence": pep,
+                        "Charge": chg,
+                        "collision_energy": collision_energy,
+                        "Fragmentation": fragmentation,
+                    }
+                )
 
     if not rows:
         raise HTTPException(
             status_code=400,
-            detail=f"No peptides in length range [{min_length}-{max_length}] after digestion"
+            detail=f"No peptides in length range [{min_length}-{max_length}] after digestion",
         )
 
     df = pd.DataFrame(rows)
@@ -339,6 +377,7 @@ async def submit_fasta_job(
 
 # ── Job status ─────────────────────────────────────────────────────────────
 
+
 @app.get("/api/jobs/{job_id}", response_model=JobStatusResponse)
 async def get_job_status(job_id: str):
     job = job_manager.get_status(job_id)
@@ -360,6 +399,7 @@ async def get_job_status(job_id: str):
 
 
 # ── Job result download ───────────────────────────────────────────────────
+
 
 @app.get("/api/jobs/{job_id}/download")
 async def download_job_result(job_id: str):
@@ -384,6 +424,7 @@ async def download_job_result(job_id: str):
 
 # ── Job list ───────────────────────────────────────────────────────────────
 
+
 @app.get("/api/jobs", response_model=list[JobListItem])
 async def list_jobs():
     jobs = job_manager.list_jobs()
@@ -400,6 +441,7 @@ async def list_jobs():
 
 
 # ── Rescore: file upload ──────────────────────────────────────────────────
+
 
 def _sanitize_filename(name: str) -> str:
     """Keep only safe characters in filenames."""
@@ -428,11 +470,15 @@ async def rescore_upload(files: List[UploadFile] = File(...)):
         size = len(content)
 
         if size > MAX_RESCORE_FILE_SIZE:
-            errors.append(f"{safe_name}: exceeds {MAX_RESCORE_FILE_SIZE // (1024*1024)}MB limit")
+            errors.append(
+                f"{safe_name}: exceeds {MAX_RESCORE_FILE_SIZE // (1024 * 1024)}MB limit"
+            )
             continue
         total_size += size
         if total_size > MAX_RESCORE_TOTAL_SIZE:
-            errors.append(f"Total upload size exceeds {MAX_RESCORE_TOTAL_SIZE // (1024*1024)}MB limit")
+            errors.append(
+                f"Total upload size exceeds {MAX_RESCORE_TOTAL_SIZE // (1024 * 1024)}MB limit"
+            )
             break
 
         file_path = upload_dir / safe_name
@@ -447,9 +493,9 @@ async def rescore_upload(files: List[UploadFile] = File(...)):
         else:
             ftype = "mgf" if ".mgf" in lower else "msms"
 
-        uploaded_files.append(UploadedFileInfo(
-            filename=safe_name, size_bytes=size, type=ftype
-        ))
+        uploaded_files.append(
+            UploadedFileInfo(filename=safe_name, size_bytes=size, type=ftype)
+        )
 
         # Parse msms files to extract Raw file info
         if ftype == "msms":
@@ -457,13 +503,16 @@ async def rescore_upload(files: List[UploadFile] = File(...)):
                 df = pd.read_csv(file_path, sep="\t", nrows=None, low_memory=False)
                 raw_files_in_msms = (
                     df["Raw file"].dropna().unique().tolist()
-                    if "Raw file" in df.columns else []
+                    if "Raw file" in df.columns
+                    else []
                 )
-                msms_files_info.append(MsmsFileInfo(
-                    filename=safe_name,
-                    total_rows=len(df),
-                    raw_files=raw_files_in_msms,
-                ))
+                msms_files_info.append(
+                    MsmsFileInfo(
+                        filename=safe_name,
+                        total_rows=len(df),
+                        raw_files=raw_files_in_msms,
+                    )
+                )
             except Exception as e:
                 errors.append(f"{safe_name}: failed to parse — {e}")
 
@@ -490,12 +539,14 @@ async def rescore_upload(files: List[UploadFile] = File(...)):
                 psm_count = int((df_tmp["Raw file"] == raw_file).sum())
             except Exception:
                 pass
-            raw_files_out.append(RawFileInfo(
-                raw_file=raw_file,
-                mgf_file=mgf_file,
-                msms_file=msms_info.filename,
-                psm_count=psm_count,
-            ))
+            raw_files_out.append(
+                RawFileInfo(
+                    raw_file=raw_file,
+                    mgf_file=mgf_file,
+                    msms_file=msms_info.filename,
+                    psm_count=psm_count,
+                )
+            )
             if mgf_file:
                 matched_mgf.add(mgf_file)
 
@@ -513,11 +564,14 @@ async def rescore_upload(files: List[UploadFile] = File(...)):
 
 # ── Rescore: submit job ───────────────────────────────────────────────────
 
+
 @app.post("/api/rescore/submit", response_model=RescoreSubmitResponse)
 async def rescore_submit(req: RescoreSubmitRequest):
     session_dir = JOBS_DIR / req.session_id
     if not session_dir.exists():
-        raise HTTPException(status_code=404, detail=f"Upload session {req.session_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Upload session {req.session_id} not found"
+        )
 
     if not req.file_params:
         raise HTTPException(status_code=400, detail="file_params cannot be empty")
@@ -549,6 +603,7 @@ async def rescore_submit(req: RescoreSubmitRequest):
 
 # ── Rescore: job status ───────────────────────────────────────────────────
 
+
 @app.get("/api/rescore/{job_id}", response_model=RescoreStatusResponse)
 async def rescore_status(job_id: str):
     job = rescore_job_manager.get_status(job_id)
@@ -572,6 +627,7 @@ async def rescore_status(job_id: str):
 
 
 # ── Rescore: download result ──────────────────────────────────────────────
+
 
 @app.get("/api/rescore/{job_id}/download/{filename}")
 async def rescore_download(job_id: str, filename: str):
@@ -620,11 +676,15 @@ async def ptm_upload(files: List[UploadFile] = File(...)):
         size = len(content)
 
         if size > MAX_PTM_FILE_SIZE:
-            errors.append(f"{safe_name}: exceeds {MAX_PTM_FILE_SIZE // (1024*1024)}MB limit")
+            errors.append(
+                f"{safe_name}: exceeds {MAX_PTM_FILE_SIZE // (1024 * 1024)}MB limit"
+            )
             continue
         total_size += size
         if total_size > MAX_PTM_TOTAL_SIZE:
-            errors.append(f"Total upload size exceeds {MAX_PTM_TOTAL_SIZE // (1024*1024)}MB limit")
+            errors.append(
+                f"Total upload size exceeds {MAX_PTM_TOTAL_SIZE // (1024 * 1024)}MB limit"
+            )
             break
 
         file_path = upload_dir / safe_name
@@ -644,9 +704,9 @@ async def ptm_upload(files: List[UploadFile] = File(...)):
         else:
             ftype = "mgf" if ".mgf" in lower else "msms"
 
-        uploaded_files.append(UploadedFileInfo(
-            filename=safe_name, size_bytes=size, type=ftype
-        ))
+        uploaded_files.append(
+            UploadedFileInfo(filename=safe_name, size_bytes=size, type=ftype)
+        )
 
         # Parse msms files to extract phospho PSM info
         if ftype == "msms":
@@ -654,19 +714,22 @@ async def ptm_upload(files: List[UploadFile] = File(...)):
                 df = pd.read_csv(file_path, sep="\t", nrows=None, low_memory=False)
                 raw_files_in_msms = (
                     df["Raw file"].dropna().unique().tolist()
-                    if "Raw file" in df.columns else []
+                    if "Raw file" in df.columns
+                    else []
                 )
                 # Count phospho PSMs
                 phospho_count = 0
                 if "Modifications" in df.columns:
                     mods = df["Modifications"].astype(str).str.lower()
                     phospho_count = int(mods.str.contains("phospho", regex=False).sum())
-                msms_files_info.append(PtmMsmsFileInfo(
-                    filename=safe_name,
-                    total_rows=len(df),
-                    raw_files=raw_files_in_msms,
-                    phospho_psm_count=phospho_count,
-                ))
+                msms_files_info.append(
+                    PtmMsmsFileInfo(
+                        filename=safe_name,
+                        total_rows=len(df),
+                        raw_files=raw_files_in_msms,
+                        phospho_psm_count=phospho_count,
+                    )
+                )
             except Exception as e:
                 errors.append(f"{safe_name}: failed to parse — {e}")
 
@@ -693,15 +756,19 @@ async def ptm_upload(files: List[UploadFile] = File(...)):
                 raw_mask = df_tmp["Raw file"] == raw_file
                 if "Modifications" in df_tmp.columns:
                     mods = df_tmp["Modifications"].astype(str).str.lower()
-                    phospho_psm_count = int((raw_mask & mods.str.contains("phospho", regex=False)).sum())
+                    phospho_psm_count = int(
+                        (raw_mask & mods.str.contains("phospho", regex=False)).sum()
+                    )
             except Exception:
                 pass
-            raw_files_out.append(PtmRawFileInfo(
-                raw_file=raw_file,
-                mgf_file=mgf_file,
-                msms_file=msms_info.filename,
-                phospho_psm_count=phospho_psm_count,
-            ))
+            raw_files_out.append(
+                PtmRawFileInfo(
+                    raw_file=raw_file,
+                    mgf_file=mgf_file,
+                    msms_file=msms_info.filename,
+                    phospho_psm_count=phospho_psm_count,
+                )
+            )
             if mgf_file:
                 matched_mgf.add(mgf_file)
 
@@ -721,11 +788,14 @@ async def ptm_upload(files: List[UploadFile] = File(...)):
 
 # ── PTM Location: submit job ─────────────────────────────────────────────
 
+
 @app.post("/api/ptm/submit", response_model=PtmSubmitResponse)
 async def ptm_submit(req: PtmSubmitRequest):
     session_dir = JOBS_DIR / req.session_id
     if not session_dir.exists():
-        raise HTTPException(status_code=404, detail=f"Upload session {req.session_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Upload session {req.session_id} not found"
+        )
 
     if not req.file_params:
         raise HTTPException(status_code=400, detail="file_params cannot be empty")
@@ -750,6 +820,7 @@ async def ptm_submit(req: PtmSubmitRequest):
 
 
 # ── PTM Location: job status ─────────────────────────────────────────────
+
 
 @app.get("/api/ptm/{job_id}", response_model=PtmStatusResponse)
 async def ptm_status(job_id: str):
@@ -777,6 +848,7 @@ async def ptm_status(job_id: str):
 
 # ── PTM Location: download result ────────────────────────────────────────
 
+
 @app.get("/api/ptm/{job_id}/download/{filename}")
 async def ptm_download(job_id: str, filename: str):
     job = ptm_job_manager.get_status(job_id)
@@ -792,4 +864,37 @@ async def ptm_download(job_id: str, filename: str):
         path=str(file_path),
         media_type="text/csv",
         filename=safe,
+    )
+
+
+# ── Demo 数据下载 ─────────────────────────────────────────────────────────
+from enum import Enum  # noqa: E402 (已在文件顶部有 Path 等导入)
+
+
+class DemoMode(str, Enum):
+    batch = "batch"
+    fasta = "fasta"
+    rescore = "rescore"
+    ptm = "ptm"
+
+
+_DEMO_FILE_MAP = {
+    DemoMode.batch: "demo_BATCH.zip",
+    DemoMode.fasta: "demo_FASTA.zip",
+    DemoMode.rescore: "demo_RESCORE.zip",
+    DemoMode.ptm: "demo_PTM_LOC.zip",
+}
+
+
+@app.get("/api/demo/{mode}")
+async def download_demo(mode: DemoMode):
+    """下载指定模块的 demo 示例数据 ZIP 包。"""
+    filename = _DEMO_FILE_MAP[mode]
+    file_path = Path(__file__).resolve().parent.parent / "data" / "demo" / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"Demo file not found: {filename}")
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type="application/zip",
     )

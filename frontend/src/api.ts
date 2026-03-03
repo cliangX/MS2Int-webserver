@@ -418,3 +418,11 @@ export async function checkHealth(): Promise<HealthResponse> {
   const res = await fetch(`${BASE}/health`);
   return res.json();
 }
+
+// ── Demo 下载 ─────────────────────────────────────────────────
+
+export type DemoMode = "batch" | "fasta" | "rescore" | "ptm";
+
+export function getDemoDownloadUrl(mode: DemoMode): string {
+  return `${BASE}/demo/${mode}`;
+}

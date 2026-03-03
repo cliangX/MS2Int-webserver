@@ -1,16 +1,7 @@
-import { useState, useEffect } from "react";
-import { Sun, Moon, Github, Plug } from "lucide-react";
+import { Github, Plug } from "lucide-react";
 import logo from "../assets/ms2int-logo.png";
 
 export default function Header() {
-  const [dark, setDark] = useState(() =>
-    document.documentElement.classList.contains("dark")
-  );
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
-
   return (
     <header style={{
       backgroundColor: "var(--color-foreground)",
@@ -41,19 +32,13 @@ export default function Header() {
             const el = document.getElementById("about");
             if (el) { el.scrollIntoView({ behavior: "smooth" }); }
           }}>ABOUT</a>
+          <span style={{ color: "inherit", opacity: 0.4, fontSize: "0.85rem" }}>│</span>
           <a href="#start" className="header-nav-link" onClick={(e) => {
             e.preventDefault();
             const el = document.getElementById("start");
             if (el) { el.scrollIntoView({ behavior: "smooth" }); }
           }}>START</a>
           <span style={{ color: "inherit", opacity: 0.4, fontSize: "0.85rem" }}>│</span>
-          <button
-            onClick={() => setDark(!dark)}
-            style={{ padding: "0.5rem", background: "none", border: "none", color: "inherit", cursor: "pointer" }}
-            title="Toggle dark mode"
-          >
-            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
           <a
             href="/docs"
             target="_blank"
