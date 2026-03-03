@@ -37,21 +37,15 @@ export default function CsvUpload({ onUpload, loading }: Props) {
 
         {/* Drop zone */}
         <div
+          className={`pixel-dropzone${dragOver ? " pixel-dropzone-active" : ""}`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          style={{
-            border: `3px dashed ${dragOver ? "var(--color-primary)" : "var(--color-muted-foreground)"}`,
-            background: dragOver ? "color-mix(in srgb, var(--color-primary) 7%, var(--color-card))" : "var(--color-card)",
-            padding: "2rem",
-            textAlign: "center",
-            cursor: "pointer",
-            transition: "border-color 0.15s",
-          }}
         >
-          <Upload style={{ width: "2rem", height: "2rem", margin: "0 auto 0.75rem", color: "var(--color-muted-foreground)", display: "block" }} />
-          <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+          <Upload className="mx-auto mb-2"
+            style={{ width: 24, height: 24, color: "var(--color-muted-foreground)" }} />
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem", color: "#000" }}>
             Drag &amp; drop or click to select
           </p>
           <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
@@ -90,9 +84,9 @@ export default function CsvUpload({ onUpload, loading }: Props) {
           onClick={handleSubmit}
           disabled={!file || loading}
           className="pixel-btn pixel-btn-primary"
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", padding: "0.3rem 0.75rem", boxShadow: "2px 2px 0 0 var(--color-border-dark)" }}
+          style={{ display: "inline-flex", alignSelf: "flex-end", alignItems: "center", gap: "0.5rem" }}
         >
-          <Upload style={{ width: "0.75rem", height: "0.75rem" }} />
+          <Upload style={{ width: "1rem", height: "1rem" }} />
           {loading ? "SUBMITTING..." : "SUBMIT BATCH JOB"}
         </button>
       </div>

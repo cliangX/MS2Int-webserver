@@ -17,7 +17,7 @@ interface Props {
 export default function JobHistory({ jobs, activeJobId, onSelect, onRemove }: Props) {
   if (jobs.length === 0) {
     return (
-      <div className="pixel-card p-4 text-center text-muted-foreground text-[1rem]">
+      <div className="pixel-card p-4 text-center text-muted-foreground text-[1.3rem]">
         No batch jobs submitted yet
       </div>
     );

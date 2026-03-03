@@ -109,7 +109,7 @@ export default function FastaMode() {
       <div className="pixel-card">
         <div className="pixel-card-header">═══ FASTA PREDICTION ═══</div>
         <div className="p-4">
-          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1rem" }}>
+          <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem" }}>
             Spectrum Library Generation
           </p>
           <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
@@ -128,21 +128,15 @@ export default function FastaMode() {
 
           {/* Drop zone */}
           <div
+            className={`pixel-dropzone${dragOver ? " pixel-dropzone-active" : ""}`}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             onClick={() => inputRef.current?.click()}
-            style={{
-              border: `3px dashed ${dragOver ? "var(--color-primary)" : "var(--color-muted-foreground)"}`,
-              background: dragOver ? "color-mix(in srgb, var(--color-primary) 7%, var(--color-card))" : "var(--color-card)",
-              padding: "2rem",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "border-color 0.15s",
-            }}
           >
-            <Dna style={{ width: "2rem", height: "2rem", margin: "0 auto 0.75rem", color: "var(--color-muted-foreground)", display: "block" }} />
-            <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)" }}>
+            <Dna className="mx-auto mb-2"
+              style={{ width: 24, height: 24, color: "var(--color-muted-foreground)" }} />
+            <p style={{ fontFamily: "var(--font-pixel-body)", fontSize: "1.3rem", color: "#000" }}>
               Drag &amp; drop or click to select a FASTA file
             </p>
             <p style={{ fontSize: "1rem", color: "var(--color-muted-foreground)", marginTop: "0.25rem" }}>
@@ -183,7 +177,7 @@ export default function FastaMode() {
 
           {/* Row 1: Charge checkboxes */}
           <div>
-            <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.6rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>
+            <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.85rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>
               CHARGE STATE(S)
             </label>
             <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -193,7 +187,7 @@ export default function FastaMode() {
                   onClick={() => toggleCharge(c)}
                   style={{
                     fontFamily: "var(--font-pixel-body)",
-                    fontSize: "0.85rem",
+                    fontSize: "1rem",
                     padding: "0.4rem 0.75rem",
                     border: "3px solid var(--color-border)",
                     background: charges.includes(c) ? "var(--color-primary)" : "var(--color-card)",
@@ -211,30 +205,30 @@ export default function FastaMode() {
           {/* Row 2: CE + Frag + Missed cleavages */}
           <div style={{ display: "flex", gap: "5rem", flexWrap: "wrap" }}>
             <div>
-              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.6rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>CE (eV)</label>
+              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.85rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>CE (eV)</label>
               <select value={ce} onChange={(e) => setCe(Number(e.target.value))} className="pixel-select" style={{ width: "6rem" }}>
                 {COLLISION_ENERGIES.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.6rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>FRAG</label>
+              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.85rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>FRAG</label>
               <select value={frag} onChange={(e) => setFrag(e.target.value)} className="pixel-select" style={{ width: "6rem" }}>
                 {FRAGMENTATIONS.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.6rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>MISSED CLEAVAGES</label>
+              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.85rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>MISSED CLEAVAGES</label>
               <select value={missedCleavages} onChange={(e) => setMissedCleavages(Number(e.target.value))} className="pixel-select" style={{ width: "4rem" }}>
                 {MISSED_CLEAVAGES.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.6rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>PEPTIDE LENGTH</label>
+              <label style={{ display: "block", fontFamily: "var(--font-pixel-title)", fontSize: "0.85rem", marginBottom: "0.5rem", letterSpacing: "0.05em" }}>PEPTIDE LENGTH</label>
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                 <input
                   type="number"
                   value={minLen}
-                  min={2}
+                  min={7}
                   max={maxLen - 1}
                   onChange={(e) => setMinLen(Number(e.target.value))}
                   className="pixel-input"
@@ -255,7 +249,7 @@ export default function FastaMode() {
           </div>
 
           {/* Submit */}
-          <div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
             <button
               onClick={handleSubmit}
               disabled={!file || loading || charges.length === 0}
@@ -266,7 +260,7 @@ export default function FastaMode() {
               {loading ? "SUBMITTING..." : "SUBMIT FASTA JOB"}
             </button>
             {charges.length === 0 && (
-              <span style={{ marginLeft: "1rem", fontSize: "0.7rem", color: "var(--color-destructive)", fontFamily: "var(--font-pixel-body)" }}>
+              <span style={{ display: "inline-block", marginTop: "0.5rem", fontSize: "0.7rem", color: "var(--color-destructive)", fontFamily: "var(--font-pixel-body)" }}>
                 Select at least one charge state
               </span>
             )}

@@ -28,7 +28,7 @@ export default function AboutSection() {
           <div style={{ padding: "1.5rem" }}>
 
             <p className="about-intro">
-              MS2Int is a deep learning framework for tandem mass spectrum prediction
+              <span className="about-intro-brand">MS2Int</span> is a deep learning framework for tandem mass spectrum prediction
               that jointly models both terminal (b/y) and internal fragment ions (m-ions).
               Built on a Mamba state-space model with virtual adversarial training,
               it delivers more complete spectral characterization for high-confidence proteomics.
@@ -86,7 +86,7 @@ export default function AboutSection() {
                 className="pixel-btn"
                 style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
               >
-                <Plug className="w-3 h-3" />
+                <Plug className="w-4 h-4" />
                 API DOCUMENTATION
               </a>
               <a
@@ -96,7 +96,7 @@ export default function AboutSection() {
                 className="pixel-btn"
                 style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
               >
-                <Github className="w-3 h-3" />
+                <Github className="w-4 h-4" />
                 INSTALL LOCAL
               </a>
             </div>
